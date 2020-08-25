@@ -10,9 +10,9 @@ let print_tree ?(module_name = "program") ?(tree_name = "tree") ?(last_goal = "l
     | _            -> failwith "Incorrect pattern in tree printer" in
 
 
-  let rec has_attr attr = function
+  (* let rec has_attr attr = function
   | (x, _) :: xs -> x.Location.txt = attr || has_attr attr xs
-  | []           -> false in
+  | []           -> false in *)
 
 
   let rec get_args_and_body expr =
@@ -65,7 +65,7 @@ let print_tree ?(module_name = "program") ?(tree_name = "tree") ?(last_goal = "l
     let f, args = normalize_apply expr in
     let name    = expr_as_ident f in
 
-    if has_attr "it_was_constr" f.pexp_attributes then
+    if Util.has_named_attr "it_was_constr" f.pexp_attributes then
       match args with
       | [{ pexp_desc = Pexp_construct ({txt = Lident "()"}, None) }] -> fprintf fmt "C \"%s\" []" name
       | _ -> fprintf fmt "C \"%s\" [%a]" name (print_list false ", " print_expr) args
@@ -121,7 +121,7 @@ let print_tree ?(module_name = "program") ?(tree_name = "tree") ?(last_goal = "l
   let tree_without_types, types =
     let one_step si (tr, ty) =
       match si.pstr_desc with
-      | Pstr_value (_, vbs) when has_attr "service_function" (List.hd vbs).pvb_attributes |> not -> si :: tr, ty
+      | Pstr_value (_, vbs) when Util.has_named_attr "service_function" (List.hd vbs).pvb_attributes |> not -> si :: tr, ty
       | _                                                                                        -> tr, si :: ty in
     List.fold_right one_step tree ([],[]) in
 
