@@ -17,13 +17,15 @@
 
 (homepage "https://github.com/Lozov-Petr/noCanren")
 
+(name noCanren)
+
 (package
  (name noCanren-tests))
 
 (package
  (name noCanren)
  (synopsis "Translator from subset of OCaml to OCanren")
- (version 0.2.0)
+ (version 0.2.1)
  (depends
   dune
   (GT :with-test)
