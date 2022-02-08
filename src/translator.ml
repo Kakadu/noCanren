@@ -173,35 +173,28 @@ let translate_high tast start_index params =
     let two_or_more_mentions tactic var_name expr =
       let rec two_or_more_mentions expr count =
         let eval_if_need c e = if c <= 1 then two_or_more_mentions e c else c in
-        (* let get_pat_vars =
-          let rec helper: type a . a Typedtree.general_pattern -> _ = fun p ->
-            match p.pat_desc with
-            | Tpat_any
-            | Tpat_constant _             -> []
-            | Tpat_var (n, _)             -> [name n]
-            | Tpat_tuple pats             -> List.concat_map helper pats
-            | Tpat_construct (_, _, pats) -> List.concat_map helper pats
-            | Tpat_record (l, _)          -> List.concat_map (fun (_, _, p) -> helper p) l
-            | Tpat_alias (t, n, _)        -> name n :: helper t
-            | Tpat_value x                -> helper (x :> Typedtree.pattern)
-            | Tpat_lazy _ | Tpat_array _ | Tpat_exception _ | Tpat_or (_, _, _)
-            | Tpat_variant _ -> failwith "Not implemented"
-          in
-          helper
-        in *)
-        let get_pat_vars : type a. a Typedtree.general_pattern -> string list =
-         fun pat ->
+        let get_pat_vars pat =
           let open Tast_pattern in
           let p () =
-            fix
-              (fun (type a) () (self : (a general_pattern, _, _) t) ->
-                let fuck = tpat_tuple (many self) in
-                tpat_any
-                |> map0 ~f:[]
-                ||| (tpat_constant drop |> map0 ~f:[])
-                ||| (tpat_var __ |> map1 ~f:(fun x -> [ name x ]))
-                (* ||| tpat_tuple (many self) *))
-              ()
+            of_func
+              (let rec helper
+                   : type a b. _ -> _ -> a general_pattern -> (string list -> b) -> b
+                 =
+                fun ctx ->
+                 to_func
+                   (tpat_any
+                   |> map0 ~f:[]
+                   ||| (tpat_constant drop |> map0 ~f:[])
+                   ||| (tpat_var __ |> map1 ~f:(fun x -> [ name x ]))
+                   ||| (tpat_tuple (many (of_func helper)) |> map1 ~f:List.concat)
+                   ||| (tpat_construct (many (of_func helper)) |> map1 ~f:List.concat)
+                   ||| (tpat_record (many (triple drop drop (of_func helper)))
+                       |> map1 ~f:List.concat)
+                   ||| (tpat_alias __ (of_func helper)
+                       |> map2 ~f:(fun n tl -> name n :: tl)))
+                   ctx
+               in
+               helper)
           in
           parse
             (p ())

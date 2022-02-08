@@ -78,6 +78,15 @@ let pair (T f1) (T f2) =
 
 let ( ** ) = pair
 
+let triple (T f1) (T f2) (T f3) =
+  T
+    (fun ctx loc (x1, x2, x3) k ->
+      let k = f1 ctx loc x1 k in
+      let k = f2 ctx loc x2 k in
+      let k = f3 ctx loc x3 k in
+      k)
+;;
+
 let __' =
   T
     (fun ctx loc x k ->
@@ -642,7 +651,7 @@ let tpat_var (T ident) =
      helper)
 ;;
 
-let tpat_tuple : (_ general_pattern list, _, _) t -> (_ general_pattern, _, _) t =
+let tpat_tuple : (value general_pattern list, _, _) t -> (_ general_pattern, _, _) t =
  fun (T ident) ->
   T
     (let rec helper : type a. _ -> _ -> a general_pattern -> _ =
@@ -687,7 +696,7 @@ let tpat_record (T ident) =
      helper)
 ;;
 
-let tpat_alias (T pat) (T ident) =
+let tpat_alias (T ident) (T pat) =
   T
     (let rec helper : type a. _ -> _ -> a general_pattern -> _ =
       fun ctx loc x k ->
@@ -695,7 +704,7 @@ let tpat_alias (T pat) (T ident) =
        | Tpat_value v -> helper ctx loc (v :> Typedtree.pattern) k
        | Tpat_alias (t, n, _) ->
          ctx.matched <- ctx.matched + 1;
-         k |> pat ctx loc t |> ident ctx loc n
+         k |> ident ctx loc n |> pat ctx loc t
        | _ -> fail loc "tpat_alias"
      in
      helper)

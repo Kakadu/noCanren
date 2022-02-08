@@ -27,6 +27,13 @@ val none : ('a option, 'b, 'b) t
 val some : ('a, 'b, 'c) t -> ('a option, 'b, 'c) t
 val pair : ('a, 'b, 'c) t -> ('d, 'c, 'e) t -> ('a * 'd, 'b, 'e) t
 val ( ** ) : ('a, 'b, 'c) t -> ('d, 'c, 'e) t -> ('a * 'd, 'b, 'e) t
+
+val triple
+  :  ('a, 'b, 'c) t
+  -> ('d, 'c, 'e) t
+  -> ('f, 'e, 'g) t
+  -> ('a * 'd * 'f, 'b, 'g) t
+
 val ( ||| ) : ('a, 'b, 'c) t -> ('a, 'b, 'c) t -> ('a, 'b, 'c) t
 val many : ('a, 'b -> 'b, 'c) t -> ('a list, 'c list -> 'd, 'd) t
 val loc : ('a, 'b, 'c) t -> ('a Location.loc, 'b, 'c) t
@@ -178,6 +185,22 @@ val typ_arrow
 val core_typ : (Types.type_expr, 'a, 'b) t -> (core_type, 'a, 'b) t
 val tpat_constant : (Asttypes.constant, 'a, 'b) t -> (_ general_pattern, 'a, 'b) t
 val tpat_tuple : (value general_pattern list, 'a, 'b) t -> ('c general_pattern, 'a, 'b) t
+
+val tpat_construct
+  :  (value general_pattern list, 'a, 'b) t
+  -> ('c general_pattern, 'a, 'b) t
+
+val tpat_record
+  :  ( (Longident.t Location.loc * Types.label_description * value general_pattern) list
+     , 'a
+     , 'b )
+     t
+  -> ('c general_pattern, 'a, 'b) t
+
+val tpat_alias
+  :  (Ident.t, 'a, 'b) t
+  -> (value general_pattern, 'b, 'c) t
+  -> ('d general_pattern, 'a, 'c) t
 
 type context
 
