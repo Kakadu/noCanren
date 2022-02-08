@@ -2,7 +2,10 @@ include Printtyped
 
 [%%if ocaml_version < (4, 11, 0)]
 
-let untype_expression = default_mapper.expr default_mapper
+let untype_expression =
+  let open Untypeast in
+  default_mapper.expr default_mapper
+;;
 
 [%%endif]
 

@@ -74,21 +74,31 @@ val eint : (int, 'a, 'b) t -> (expression, 'a, 'b) t
 val ebool : (expression, bool -> 'a, 'a) t
 val econst : (Asttypes.constant, 'a, 'b) t -> (expression, 'a, 'b) t
 
-[%%if ocaml_version < (4, 11, 0)]
+module Extra_types : sig
+  [%%if ocaml_version < (4, 11, 2)]
 
-type case_val = Typedtree.case
-type case_comp = Typedtree.case
-type value_pat = pattern
-type comp_pat = pattern
+  (* 4.10 *)
+  type case_val = Typedtree.case
+  type case_comp = Typedtree.case
+  type value_pat = pattern
+  type comp_pat = pattern
+  type _ general_pattern = pattern
+  type value
+  type 'a pattern_data = 'a
+  type 'a pattern_desc = Typedtree.pattern
 
-[%%else]
+  [%%else]
 
-type case_val = value case
-type case_comp = computation case
-type value_pat = value pattern_desc pattern_data
-type comp_pat = computation pattern_desc pattern_data
+  type case_val = value case
+  type case_comp = computation case
+  type value_pat = value pattern_desc pattern_data
+  type comp_pat = computation pattern_desc pattern_data
+  type 'a pattern_desc = 'a Typedtree.pattern_desc
 
-[%%endif]
+  [%%endif]
+end
+
+open Extra_types
 
 val nolabel : (Asttypes.arg_label, 'a, 'a) t
 val tpat_var : (Ident.t, 'a, 'b) t -> (_ general_pattern, 'a, 'b) t

@@ -297,15 +297,14 @@ let create_logic_var name =
   }
 ;;
 
+open Tast_pattern.Extra_types
+
 let have_unifier =
   let helper
       (type a b)
-      (self :
-        a Typedtree.pattern_desc pattern_data
-        -> b Typedtree.pattern_desc pattern_data
-        -> bool)
-      (p1 : a Typedtree.pattern_desc pattern_data)
-      (p2 : b Typedtree.pattern_desc pattern_data)
+      (self : a pattern_desc pattern_data -> b pattern_desc pattern_data -> bool)
+      (p1 : a pattern_desc pattern_data)
+      (p2 : b pattern_desc pattern_data)
     =
     match p1.pat_desc, p2.pat_desc with
     | Tpat_any, _ | _, Tpat_any | Tpat_var _, _ | _, Tpat_var _ -> true
@@ -327,7 +326,7 @@ let have_unifier =
 ;;
 
 let translate_pat pat fresher =
-  let rec helper : type a. a Typedtree.general_pattern -> _ =
+  let rec helper : type a. a general_pattern -> _ =
    fun pat ->
     let open Typedtree in
     let loc = pat.pat_loc in
@@ -345,8 +344,9 @@ let translate_pat pat fresher =
       ( [%expr [%e lowercase_lident id.txt |> mknoloc |> Exp.ident |> mark_constr] ()]
       , []
       , [] )
-    (* | Tpat_value {pat_desc = Tpat_construct ({txt}, _, args)} *)
+#if OCAML_VERSION < (3, 11, 0)
     | Tpat_value x -> helper (x :> Typedtree.value Typedtree.general_pattern)
+#endif
     | Tpat_construct ({ txt }, _, args) ->
       let args, als, vars = List.map (fun q -> helper q) args |> split3 in
       let vars = List.concat vars in
@@ -397,7 +397,7 @@ let translate_pat pat fresher =
 ;;
 
 let is_disj_pats =
-  let rec helper : type a. a Typedtree.pattern_desc pattern_data list -> bool =
+  let rec helper : type a. a general_pattern list -> bool =
    fun xs ->
     match xs with
     | [] -> true

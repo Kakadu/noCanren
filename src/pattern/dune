@@ -9,5 +9,11 @@
  (wrapped false)
  (libraries ppxlib)
  (preprocess
-  (pps ppx_optcomp ppx_inline_test))
+  (pps
+   ppx_optcomp
+   ppx_inline_test
+   --
+   ; -pp "cppo -V OCAML:4.02.1"
+   -pp
+   "cppo -V OCAML:4.12.1"))
  (inline_tests))

@@ -370,12 +370,40 @@ let tpat_exception (T fpat) =
       | _ -> fail loc "tpat_exception")
 ;;
 
+module Extra_types = struct
+  [%%if ocaml_version < (4, 11, 2)]
+
+  (* 4.10 *)
+  type case_val = Typedtree.case
+  type case_comp = Typedtree.case
+  type value_pat = pattern
+  type comp_pat = pattern
+  type _ general_pattern = pattern
+  type value
+  type 'a pattern_data = 'a
+  type 'a pattern_desc = Typedtree.pattern
+
+  [%%else]
+
+  type case_val = value case
+  type case_comp = computation case
+  type value_pat = value pattern_desc pattern_data
+  type comp_pat = computation pattern_desc pattern_data
+  type 'a pattern_desc = 'a Typedtree.pattern_desc
+
+  [%%endif]
+end
+
+open Extra_types
+
 let tpat_any =
   T
     (let rec helper : type a. _ -> _ -> a general_pattern -> _ =
       fun ctx loc x k ->
        match x.pat_desc with
+(* #if notdefined(OCAML_VERSION) || OCAML_VERSION < (3, 11, 0) *)
        | Tpat_value v -> helper ctx loc (v :> Typedtree.pattern) k
+(* #endif *)
        | Tpat_any ->
          ctx.matched <- ctx.matched + 1;
          k
@@ -461,23 +489,6 @@ let nolabel =
 
 let texp_apply1 f x = texp_apply f ((nolabel ** some x) ^:: nil)
 let texp_apply2 f x y = texp_apply f ((nolabel ** some x) ^:: (nolabel ** some y) ^:: nil)
-
-[%%if ocaml_version < (4, 11, 2)]
-
-(* 4.10 *)
-type case_val = Typedtree.case
-type case_comp = Typedtree.case
-type value_pat = pattern
-type comp_pat = pattern
-
-[%%else]
-
-type case_val = value case
-type case_comp = computation case
-type value_pat = value pattern_desc pattern_data
-type comp_pat = computation pattern_desc pattern_data
-
-[%%endif]
 
 let texp_function (T fcases) =
   T
@@ -574,28 +585,7 @@ let rld_overriden (T flident) (T fexpr) =
       | _ -> fail loc "rld_overriden")
 ;;
 
-(*   let hack0 (T path0) =
-    T
-      (fun ctx loc x k ->
-        match x.Types.val_type.Types.desc with
-        | Tconstr (path, [], _) ->
-          ctx.matched <- ctx.matched + 1;
-          path0 ctx loc path k
-        | _ -> fail loc "hack0")
-  ;;
 
-  let hack1 ?(on_vd = drop) (T path0) =
-    T
-      (fun ctx loc x k ->
-        match x.exp_desc with
-        | Texp_ident (path, _, vd) ->
-          ctx.matched <- ctx.matched + 1;
-          let (T fvd) = on_vd in
-          k |> path0 ctx loc path |> fvd ctx loc vd
-        | _ -> fail loc "texp_ident")
-  ;;
-
-  let __ path = hack1 __ path *)
 let rec core_typ (T ftexpr) = T (fun ctx loc x k -> ftexpr ctx loc x.ctyp_type k)
 
 let rec typ_constr (T fpath) (T fargs) =
@@ -628,7 +618,9 @@ let tpat_constant (T constant) =
     (let rec helper : type a. _ -> _ -> a general_pattern -> _ =
       fun ctx loc x k ->
        match x.pat_desc with
+#if OCAML_VERSION >= (4, 11, 0)
        | Tpat_value v -> helper ctx loc (v :> Typedtree.pattern) k
+#endif
        | Tpat_constant c ->
          ctx.matched <- ctx.matched + 1;
          k |> constant ctx loc c
@@ -642,7 +634,9 @@ let tpat_var (T ident) =
     (let rec helper : type a. _ -> _ -> a general_pattern -> _ =
       fun ctx loc x k ->
        match x.pat_desc with
+#if OCAML_VERSION >= (4, 11, 0)
        | Tpat_value v -> helper ctx loc (v :> Typedtree.pattern) k
+#endif
        | Tpat_var (i, _) ->
          ctx.matched <- ctx.matched + 1;
          k |> ident ctx loc i
@@ -657,12 +651,12 @@ let tpat_tuple : (value general_pattern list, _, _) t -> (_ general_pattern, _, 
     (let rec helper : type a. _ -> _ -> a general_pattern -> _ =
       fun ctx loc x k ->
        match x.pat_desc with
+#if OCAML_VERSION >= (4, 11, 0)
        | Tpat_value v -> helper ctx loc (v :> Typedtree.pattern) k
+#endif
        | Tpat_tuple xs ->
          ctx.matched <- ctx.matched + 1;
          k |> ident ctx loc xs
-         (* escapes it's scope *)
-         (* k |> ident ctx loc (xs :> a general_pattern list) *)
        | _ -> fail loc "tpat_tuple"
      in
      helper)
@@ -673,7 +667,9 @@ let tpat_construct (T ident) =
     (let rec helper : type a. _ -> _ -> a general_pattern -> _ =
       fun ctx loc x k ->
        match x.pat_desc with
+#if OCAML_VERSION >= (4, 11, 0)
        | Tpat_value v -> helper ctx loc (v :> Typedtree.pattern) k
+#endif
        | Tpat_construct (_, _, xs) ->
          ctx.matched <- ctx.matched + 1;
          k |> ident ctx loc xs
@@ -687,7 +683,9 @@ let tpat_record (T ident) =
     (let rec helper : type a. _ -> _ -> a general_pattern -> _ =
       fun ctx loc x k ->
        match x.pat_desc with
+#if OCAML_VERSION >= (4, 11, 0)
        | Tpat_value v -> helper ctx loc (v :> Typedtree.pattern) k
+#endif
        | Tpat_record (xs, _) ->
          ctx.matched <- ctx.matched + 1;
          k |> ident ctx loc xs
@@ -701,7 +699,9 @@ let tpat_alias (T ident) (T pat) =
     (let rec helper : type a. _ -> _ -> a general_pattern -> _ =
       fun ctx loc x k ->
        match x.pat_desc with
+#if OCAML_VERSION >= (4, 11, 0)
        | Tpat_value v -> helper ctx loc (v :> Typedtree.pattern) k
+#endif
        | Tpat_alias (t, n, _) ->
          ctx.matched <- ctx.matched + 1;
          k |> ident ctx loc n |> pat ctx loc t

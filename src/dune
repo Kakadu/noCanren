@@ -16,4 +16,10 @@
   Printer_in_spec
   noCanren)
  (preprocess
-  (pps ppxlib.metaquot ppx_optcomp)))
+  (pps
+   ppxlib.metaquot
+   ppx_optcomp
+   --
+   ;-pp "cppo -V OCAML:4.02.1"
+   -pp
+   "cppo -V OCAML:4.12.1")))
