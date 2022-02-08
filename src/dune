@@ -1,13 +1,13 @@
 (env
  (_
   (flags
-   (:standard -w -9-27))))
+   (:standard -w -9-27 -warn-error -33))))
 
 (executable
  (name noCanren)
  (public_name noCanren)
  (package noCanren)
- (libraries compiler-libs.common ppxlib)
+ (libraries compiler-libs.common ppxlib Tast_pattern)
  (modules
   Util
   Put_distrib
