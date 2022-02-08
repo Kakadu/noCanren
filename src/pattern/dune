@@ -1,0 +1,13 @@
+(env
+ (_
+  (flags
+   (:standard -w -9-32-39))))
+
+(library
+ (name Tast_pattern)
+ (modules Tast_pattern MyPrinttyped MyUntype)
+ (wrapped false)
+ (libraries ppxlib)
+ (preprocess
+  (pps ppx_optcomp ppx_inline_test))
+ (inline_tests))
