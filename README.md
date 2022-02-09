@@ -1,12 +1,13 @@
-| Upstream master         | Kakadu dune          |
-| ------------------------|----------------------|
-| [![noCanren][1]][2]     | [![noCanren][3]][4]  |
+| Upstream master         | Kakadu dune          | Kakadu 4.13          |
+| ------------------------|----------------------|----------------------|
+| [![noCanren][1]][2]     | [![noCanren][3]][4]  | [![noCanren][5]][4]  |
 
 
 [1]:  https://github.com/Lozov-Petr/noCanren/workflows/XXXXXXXX/badge.svg?branch=master
 [2]:  https://github.com/Lozov-Petr/noCanren/actions
 [3]:  https://github.com/Kakadu/noCanren/workflows/Build/badge.svg?branch=dune
 [4]:  https://github.com/Kakadu/noCanren/actions
+[5]:  https://github.com/Kakadu/noCanren/workflows/Build_4.13/badge.svg?branch=dune+4.13
 
 # README #
 
