@@ -59,9 +59,9 @@ jobs:
 
       - name: Installing a package
         run: |
-          opam exec -- dune build @install --profile=release
+          opam exec -- dune build @install --profile=release -p noCanren
           #opam exec -- dune install --profile=release noCanren
-          opam install . --yes
+          opam install noCanren --yes
 
       - name: Listing files
         run: |
